@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cdtu.mappers.StandardMapper">
+	<resultMap type="Standard" id="standardResultMap">
+		<id column="s_id" property="id"/>
+		
+		<result column="s_spec" property="specification"/>
+		<result column="s_name" property="name"/>
+		<result column="sample_type" property="sampleType"/>
+		<result column="domain_code" property="domainCode"/>
+		<result column="limited_field" property="limitedField"/>
+		<result column="s_mark" property="mark"/>
+		<result column="s_status" property="status"/>
+		<result column="s_addr" property="address"/>
+	</resultMap>
+
+  <select id="findAllStandards" resultMap="standardResultMap">
+    SELECT * FROM tb_standard;
+  </select>
+  <select id="findStandardById" parameterType="string" resultMap="standardResultMap">
+  	SELECT * FROM tb_standard
+  		WHERE s_id = #{id}
+  </select>
+  <select id="findStandardByName" parameterType="string" resultMap="standardResultMap">
+  	SELECT * FROM tb_standard
+  		WHERE s_name = #{name}
+  </select>
+  
+  <insert id="insertStandard" parameterType="Standard">
+  	<selectKey keyProperty="id" order="BEFORE" resultType="string">
+  		SELECT UUID()
+  	</selectKey>
+  	INSERT INTO tb_standard(s_id,s_spec,s_name,sample_type,domain_code,
+  		limited_field,s_mark,s_addr,s_status)
+  		VALUES(#{id},#{specification},#{name},#{sampleType},#{domainCode},
+  			#{limitedField},#{mark},#{address},#{status})
+  </insert>
+  
+  <update id="updateStandard" parameterType="Standard">
+  	UPDATE tb_standard
+	  	<set>
+	  		<if test="specification != null">
+	  			s_spec = #{specification},
+	  		</if>
+	  		<if test="name != null">
+	  			s_name = #{name},
+	  		</if>
+	  		<if test="sampleType != null">
+	  			sample_type = #{sampleType},
+	  		</if>
+	  		<if test="domainCode != null">
+	  			domain_code = #{domainCode},
+	  		</if>
+	  		<if test="limitedField != null">
+	  			limited_field = #{limitedField},
+	  		</if>
+	  		<if test="mark != null">
+	  			s_mark = #{mark},
+	  		</if>
+	  		<if test="address != null">
+	  			s_addr = #{address},
+	  		</if>
+	  		<if test="status == '0' or status == '1'">
+	  			s_status = #{status}
+	  		</if>
+	  	</set>
+	  	WHERE s_id = #{id}
+  </update>
+  
+  <delete id="removeStandardById" parameterType="string">
+  	DELETE FROM tb_standard
+  		WHERE s_id = #{id}
+  </delete>
+  <delete id="removeAllStandards">
+  	DELETE FROM tb_standard
+  </delete>
+</mapper>

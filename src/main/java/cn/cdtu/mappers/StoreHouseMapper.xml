@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cdtu.mappers.StoreHouseMapper">
+	<resultMap type="StoreHouse" id="storeHouseResultMap">
+		<id column="h_id" property="id"/>
+		
+		<result column="h_name" property="name"/>
+	</resultMap>
+
+	<insert id="insertStoreHouse" parameterType="StoreHouse">
+		<selectKey keyProperty="id" order="BEFORE" resultType="string">
+			SELECT UUID()
+		</selectKey>
+		INSERT INTO tb_storehouse(h_id,h_name)
+			VALUES(#{id},#{name})
+	</insert>
+
+	<select id="findStoreHouseById" parameterType="string" resultMap="storeHouseResultMap">
+		SELECT * FROM tb_storehouse
+			WHERE h_id = #{id}
+	</select>
+	<select id="findStoreHouseByName" parameterType="string" resultMap="storeHouseResultMap">
+		SELECT * FROM tb_storehouse
+			WHERE h_name = #{name}
+	</select>
+	
+	<delete id="removeStoreHouseById" parameterType="string">
+		DELETE FROM tb_storehouse
+			WHERE h_id = #{id}
+	</delete>
+	<delete id="removeStoreHouseByName" parameterType="string">
+		DELETE FROM tb_storehouse
+			WHERE h_name = #{name}
+	</delete>
+	<delete id="removeAllStoreHouses" parameterType="string">
+		DELETE FROM tb_storehouse
+	</delete>
+</mapper>

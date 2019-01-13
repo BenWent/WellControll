@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cdtu.mappers.DeviceMapper">
+	<resultMap type="Device" id="deviceResultMap">
+		<id column="d_id" property="id"/>
+		
+		<result column="d_name" property="name"/>
+		<result column="d_type" property="type"/>
+		<result column="d_amount" property="amount"/>
+		<result column="d_number" property="number"/>
+		<result column="d_bst" property="beginningStartUseTime" javaType="java.sql.Date" jdbcType="DATE"/>
+		<result column="d_duration" property="overdueDate" javaType="java.sql.Date" jdbcType="DATE"/>
+		<result column="d_cost" property="cost"/>
+		<result column="d_addr" property="address"/>
+		<result column="d_mark" property="mark"/>
+		
+		<association property="manufacturer" javaType="Manufacturer" >
+			<id column="m_id" property="id"/>
+			
+			<result column="m_name" property="name"/>
+		</association>
+	</resultMap>
+	
+	<insert id="insertDevice" parameterType="Device">
+		<selectKey keyProperty="id" order="BEFORE" resultType="string">
+			SELECT UUID()
+		</selectKey>
+		INSERT INTO tb_device(d_id,d_name,d_type,d_amount,d_number,d_bst,
+				d_duration,d_cost,d_addr,d_mark,m_id)
+			VALUES(#{id},#{name},#{type},#{amount},#{number},#{beginningStartUseTime},
+				#{overdueDate},#{cost},#{address},#{mark},#{manufacturer.id})
+	</insert>
+	
+	<delete id="removeAllDevices">
+		DELETE FROM tb_device
+	</delete>
+	<delete id="removeDeviceById" parameterType="string">
+		DELETE FROM tb_device
+			WHERE d_id = #{id}
+	</delete>
+	
+	<update id="updateDevice" parameterType="Device">
+		UPDATE tb_device
+			<set>
+				<if test="name != null and name != ''">
+					d_name = #{name},
+				</if>
+				<if test="type != null and type != ''">
+					d_type = #{type},
+				</if>
+				<if test="amount > 0">
+					d_amount = #{amount},
+				</if>
+				<if test="number != null and number != ''">
+					d_number = #{number},
+				</if>
+				<if test="beginningStartUseTime != null">
+					d_bst = #{beginningStartUseTime},
+				</if>
+				<if test="overdueDate != null">
+					d_duration = #{overdueDate},
+				</if>
+				<if test="cost > 0">
+					d_cost = #{cost},
+				</if>
+				<if test="address != null and address != ''">
+					d_addr = #{address},
+				</if>
+				<if test="mark != null and mark != ''">
+					d_mark = #{mark},
+				</if>
+				<if test="manufacturer != null">
+					m_id = #{manufacturer.id}
+				</if>
+			</set>
+			WHERE d_id = #{id}
+	</update>
+	
+	<select id="findAllDevices" resultMap="deviceResultMap">
+		SELECT d.*,m.* FROM tb_device AS d
+				INNER JOIN tb_manufacturer AS m
+			WHERE d.m_id = m.m_id
+	</select>
+	<select id="findDeviceById" resultMap="deviceResultMap">
+		SELECT d.*,m.* FROM tb_device AS d
+				INNER JOIN tb_manufacturer AS m
+			WHERE d.m_id = m.m_id
+				AND d.d_id = #{id}
+	</select>
+	<select id="countManufacturerByName" parameterType="string" resultType="int">
+		SELECT COUNT(*) FROM tb_device AS d
+			WHERE d.m_id = (SELECT m_id FROM tb_manufacturer AS m
+				WHERE m.m_name = #{name})
+	</select>
+</mapper>

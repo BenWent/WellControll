@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cdtu.mappers.ManufacturerMapper">
+	<resultMap type="Manufacturer" id="manufacturerResultMap">
+		<id column="m_id" property="id"/>
+		
+		<result column="m_name" property="name"/>
+	</resultMap>
+
+	<select id="findManufacturerById" parameterType="string" resultMap="manufacturerResultMap">
+		SELECT * FROM tb_manufacturer
+			WHERE m_id = #{id}
+	</select>
+	<select id="findManufacturerByName" resultMap="manufacturerResultMap">
+		SELECT * FROM tb_manufacturer
+			WHERE m_name = #{name}
+	</select>
+	
+	<insert id="insertManufacturer" parameterType="Manufacturer">
+		<selectKey keyProperty="id" order="BEFORE" resultType="string">
+			SELECT UUID()
+		</selectKey>
+		INSERT INTO tb_manufacturer(m_id,m_name)
+			VALUES(#{id},#{name})
+	</insert>
+	
+	<delete id="removeManufacturerByName" parameterType="string">
+		DELETE FROM tb_manufacturer
+			WHERE m_name = #{name}
+	</delete>
+	<delete id="removeManufacturerById" parameterType="string">
+		DELETE FROM tb_manufacturer
+			WHERE m_id = #{id}
+	</delete>
+</mapper>

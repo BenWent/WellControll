@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cdtu.mappers.SamplePlanMapper">
+	<resultMap type="SamplePlan" id="samplePlanResultMap">
+		<id column="sa_id" property="id"/>
+		
+		<result column="date" property="date" javaType="java.sql.Date"/>
+		<result column="batch" property="batch"/>
+		<result column="sa_mark" property="mark"/>
+		
+		<association property="product" column="p_id" javaType="Product" select="cn.cdtu.mappers.ProductMapper.findProductById"/>
+		<association property="standard" column="s_id" javaType="Standard" select="cn.cdtu.mappers.StandardMapper.findStandardById"/>
+		<association property="user" column="u_name" javaType="User" select="cn.cdtu.mappers.UserMapper.findUserByName"/>
+	</resultMap>
+
+	<select id="findSamplePlanById" parameterType="string" resultMap="samplePlanResultMap">
+		SELECT * FROM tb_sample_plan
+			WHERE sa_id = #{id}
+	</select>
+	<select id="findAllSamplePlans" resultMap="samplePlanResultMap">
+		SELECT * FROM tb_sample_plan
+	</select>
+	
+	<insert id="insertSamplePlan" parameterType="SamplePlan">
+		<selectKey keyProperty="id" order="BEFORE" resultType="string">
+			SELECT UUID()
+		</selectKey>
+		INSERT INTO tb_sample_plan(sa_id,date,batch,sa_mark,
+				p_id,s_id,u_name)
+			VALUES(#{id},#{date},#{batch},#{mark},
+				#{product.id},#{standard.id},#{user.name})
+	</insert>
+	
+	<delete id="removeSamplePlanById" parameterType="string">
+		DELETE FROM tb_sample_plan
+			WHERE sa_id = #{id}
+	</delete>
+	<delete id="removeAllSamplePlans">
+		DELETE FROM tb_sample_plan
+	</delete>
+	
+	<update id="updateSamplePlan" parameterType="SamplePlan">
+		UPDATE tb_sample_plan
+				<set>
+					<if test="date != null">
+						date = #{date},
+					</if>
+					<if test="batch > 0">
+						batch = #{batch},
+					</if>
+					<if test="mark != null">
+						sa_mark = #{mark},
+					</if>
+					<if test="product != null">
+						p_id = #{product.id},
+					</if>
+					<if test="standard != null">
+						s_id = #{standard.id},
+					</if>
+				</set>
+			WHERE sa_id = #{id}
+	</update>
+</mapper>

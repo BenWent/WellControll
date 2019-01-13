@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cdtu.mappers.ProductMapper">
+	<resultMap type="Product" id="productResultMap">
+		<id column="p_id" property="id"/>
+		
+		<result column="p_name" property="name"/>
+		<result column="p_items" property="items"/>
+		<result column="p_status" property="status"/>
+		
+		<association property="productType" javaType="ProductType" column="t_id" select="cn.cdtu.mappers.ProductTypeMapper.findProductTypeById"/>
+		<association property="manufacturer" javaType="Manufacturer" column="m_id" select="cn.cdtu.mappers.ManufacturerMapper.findManufacturerById"/>
+		<association property="storeHouse" javaType="StoreHouse" column="h_id" select="cn.cdtu.mappers.StoreHouseMapper.findStoreHouseById"/>
+		<association property="user" javaType="User" column="u_name" select="cn.cdtu.mappers.UserMapper.findUserByName"/>
+	</resultMap>
+
+  <select id="findAllProducts" resultMap="productResultMap">
+    SELECT * FROM tb_product
+  </select>
+  <select id="findProductById" parameterType="string" resultMap="productResultMap">
+    SELECT * FROM tb_product
+    	WHERE p_id = #{id}
+  </select>
+  <select id="findProductByName" parameterType="string" resultMap="productResultMap">
+    SELECT * FROM tb_product
+	   WHERE p_name = #{name}
+  </select>
+  <select id="countManufacturerByName" parameterType="string" resultType="int">
+		SELECT COUNT(*) FROM tb_product AS p
+			WHERE p.m_id = (SELECT m_id FROM tb_manufacturer AS m
+				WHERE m.m_name = #{name})
+  </select>
+  <select id="countProductTypeByName" parameterType="string" resultType="int">
+		SELECT COUNT(*) FROM tb_product AS p
+			WHERE p.t_id = (SELECT t_id FROM tb_type AS t
+				WHERE t.t_name = #{name})
+  </select>
+  <select id="countStoreHouseByName" parameterType="string" resultType="int">
+		SELECT COUNT(*) FROM tb_product AS p
+			WHERE p.h_id = (SELECT h_id FROM tb_storehouse AS h
+				WHERE h.h_name = #{name})
+  </select>
+  
+  <insert id="insertProduct" parameterType="Product">
+  	<selectKey keyProperty="id" order="BEFORE" resultType="string">
+  		SELECT UUID()
+  	</selectKey>
+  	INSERT INTO tb_product(p_id,p_name,p_items,p_status,
+  			t_id,m_id,h_id,u_name)	
+  		VALUES(#{id},#{name},#{items},#{status},
+  			#{productType.id},#{manufacturer.id},#{storeHouse.id},#{user.name})
+  </insert>
+  
+  <update id="updateProduct" parameterType="Product">
+  	UPDATE tb_product
+  			<set>
+  				<if test="name != null and name != ''">
+  					p_name = #{name},
+  				</if>
+  				<if test="items != null and items != ''">
+  					p_items = #{items},
+  				</if>
+  				<if test="status == '0' or status == '1'">
+  					p_status = #{status},
+  				</if>
+  				<if test="productType != null">
+  					t_id = #{productType.id},
+  				</if>
+  				<if test="manufacturer != null">
+  					m_id = #{manufacturer.id},
+  				</if>
+  				<if test="storeHouse != null">
+  					h_id = #{storeHouse.id}
+  				</if>
+  				<if test="user != null">
+  					u_name = #{user.name}
+  				</if>
+  			</set>
+  		WHERE p_id = #{id}
+  </update>
+  
+  <delete id="removeAllProducts">
+  	DELETE FROM tb_product
+  </delete>
+  <delete id="removeProductById" parameterType="string">
+  	DELETE FROM tb_product
+  		WHERE p_id = #{id}
+  </delete>
+</mapper>

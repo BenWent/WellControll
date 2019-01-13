@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<!-- 关闭全局的延迟加载，所有关联对象都会延迟加载 -->
+		<setting name="lazyLoadingEnabled" value="false"/>
+		<setting name="aggressiveLazyLoading" value="true" />  
+		<!-- 开启驼峰命名规则映射 -->
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+	</settings>
+
+	<!-- 为XxxMapper.xml中的属性parameterType和resultType的值取别名 -->
+	<typeAliases>
+		<!-- 批量的给指定包下的所有JavaBean指定别名，别名就是JavaBean的类名 -->
+		<package name="cn/cdtu/beans"/>
+	</typeAliases>
+</configuration>

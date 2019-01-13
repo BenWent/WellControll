@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cdtu.mappers.ProductTypeMapper">
+	<resultMap type="ProductType" id="productTypeResultMap">
+		<id column="t_id" property="id"/>
+		
+		<result column="t_name" property="name"/>
+		<result column="t_spec" property="specification"/>
+	</resultMap>
+
+	<insert id="insertProductType" parameterType="ProductType">
+		<selectKey keyProperty="id" order="BEFORE" resultType="string">
+			SELECT UUID()
+		</selectKey>
+		INSERT INTO tb_type(t_id,t_name,t_spec)
+			VALUES(#{id},#{name},#{specification})
+	</insert>
+	
+	<select id="findProductTypeById" parameterType="string" resultMap="productTypeResultMap">
+		SELECT * FROM tb_type
+			WHERE t_id = #{id}
+	</select>
+	<select id="findProductTypeByName" parameterType="string" resultMap="productTypeResultMap">
+		SELECT * FROM tb_type
+			WHERE t_name = #{name}
+	</select>
+	
+	<delete id="removeProductTypeById" parameterType="string">
+		DELETE FROM tb_type
+			WHERE t_id = #{id}
+	</delete>
+	<delete id="removeProductTypeByName" parameterType="string">
+		DELETE FROM tb_type
+			WHERE t_name = #{name}
+	</delete>
+	<delete id="removeAllProductTypes" parameterType="string">
+		DELETE FROM tb_type
+	</delete>
+</mapper>

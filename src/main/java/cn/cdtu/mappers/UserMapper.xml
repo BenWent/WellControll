@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cdtu.mappers.UserMapper">
+	<resultMap type="User" id="userResultMap">
+		<id column="u_name" property="name"/>
+		
+		<result column="u_pwd" property="password"/>
+		<result column="u_priv" property="privilege"/>
+	</resultMap>
+
+	<insert id="insertUser" parameterType="User">
+		INSERT INTO tb_user(u_name,u_pwd,u_priv)
+			VALUES(#{name},#{password},#{privilege})
+	</insert>
+
+	<delete id="removeUserByName" parameterType="string">
+		DELETE FROM tb_user
+			WHERE u_name = #{name}
+	</delete>
+	
+	<update id="updateUser" parameterType="User">
+		UPDATE tb_user
+			<set>
+				<if test="password != null and password != ''">
+					u_pwd = #{password},
+				</if>
+				<if test="privilege == '0' or privilege = '1'">
+					u_priv = #{privilege}
+				</if>
+			</set>
+			WHERE u_name = #{name}
+	</update>
+	
+	<select id="findAllUsers" resultMap="userResultMap">
+		SELECT * FROM tb_user
+	</select>
+	<select id="findUserByName" parameterType="string" resultMap="userResultMap">
+		SELECT * FROM tb_user
+			WHERE u_name = #{name}
+	</select>
+</mapper>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cdtu.mappers.ReportMapper">
+	<resultMap type="Report" id="reportResultMap">
+		<id column="r_id" property="id"/>
+		
+		<result column="failed_items" property="failedItems"/>
+		<result column="result" property="result"/>
+		<result column="r_addr" property="address"/>
+		<result column="r_img" property="imagePath"/>
+		<result column="r_mark" property="mark"/>
+		<result column="recheck" property="recheck"/>
+		<result column="store" property="store"/>
+		<result column="out_comm" property="isOutsoucing"/>
+		<result column="post" property="isPost"/>
+		<result column="post_time" property="postTime"/>
+		<result column="post_addr" property="postAddress"/>
+		<result column="contact" property="contact"/>
+		<result column="contact_pho_num" property="contactPhoneNumber"/>
+		<result column="r_status" property="status"/>
+		<result column="check_date" property="checkDate"/>
+		
+		<association property="samplePlan" javaType="SamplePlan" column="sa_id" select="cn.cdtu.mappers.SamplePlanMapper.findSamplePlanById"/>
+		<association property="user" javaType="User" column="u_name" select="cn.cdtu.mappers.UserMapper.findUserByName"/>
+	</resultMap>
+	
+	<resultMap type="cn.cdtu.beans.UnqualifiedMessage" id="messageResultMap">
+		<result column="name" property="companyName"/>
+		<result column="count" property="unqualifiedProductCount"/>
+	</resultMap>
+	
+	<delete id="removeAllReports">
+		DELETE FROM tb_report
+	</delete>
+	<delete id="removeReportById">
+		DELETE FROM tb_report
+			WHERE r_id = #{id}
+	</delete>
+
+	<insert id="insertReport" parameterType="Report">
+		INSERT INTO tb_report(r_id,sa_id,u_name,failed_items,result,r_addr,r_img
+				,r_mark,r_status,recheck,store,out_comm,post,post_time,post_addr
+				,contact,contact_pho_num,check_date)
+			VALUES(#{id},#{samplePlan.id},#{user.name},#{failedItems},#{result}
+				,#{address},#{imagePath},#{mark},#{status},#{recheck},#{store}
+				,#{isOutsoucing},#{isPost},#{postTime},#{postAddress},#{contact}
+				,#{contactPhoneNumber},#{checkDate})
+	</insert>
+
+	<update id="updateReport" parameterType="Report">
+		<selectKey keyProperty="db_status" order="BEFORE" resultType="string">
+			SELECT r_status
+				FROM tb_report
+				WHERE r_id = #{id}
+		</selectKey>
+		UPDATE tb_report
+				<set>
+					<if test="failedItems != null">
+						failed_items = #{failedItems},
+					</if>
+					<if test="result == '0' or result == '1'">
+						result = #{result},
+					</if>
+					<if test="address != null">
+						r_addr = #{address},
+					</if>
+					<if test="imagePath != null">
+						r_img = #{imagePath},
+					</if>
+					<if test="mark != null">
+						r_mark = #{mark},
+					</if>
+					<if test="checkDate != null">
+						check_date = #{checkDate},
+					</if>
+					<if test="recheck == '0' or recheck == '1'">
+						recheck = #{recheck},
+					</if>
+					<if test="store == '0' or store == '1'">
+						store = #{store},
+					</if>
+					<if test="isOutsoucing == '0' or isOutsoucing == '1'">
+						out_comm = #{isOutsoucing},
+					</if>
+					<if test="isPost == '0' or isPost == '1'">
+						post = #{isPost},
+					</if>
+					<if test="postTime != null">
+						post_time = #{postTime},
+					</if>
+					<if test="postAddress != null">
+						post_addr = #{postAddress},
+					</if>
+					<if test="contact != null">
+						contact = #{contact},
+					</if>
+					<if test="contactPhoneNumber != null">
+						contact_pho_num = #{contactPhoneNumber},
+					</if>
+					<if test="status == '0' or status == '1'">
+						r_status = #{status},
+					</if>
+					<if test="db_status == '0' and status == '1'">
+						u_name = #{user.name}
+					</if>
+				</set>
+			WHERE r_id = #{id}
+	</update>
+	
+	<select id="findReportById" parameterType="string" resultMap="reportResultMap">
+		SELECT * FROM tb_report 
+			WHERE r_id = #{id}
+	</select>
+	<select id="findAllReports" resultMap="reportResultMap">
+		SELECT * FROM tb_report
+	</select>
+	
+	<select id="findUnqualifiedMessagesByYear"  parameterType="string" resultMap="messageResultMap">
+		SELECT COUNT(m.m_name)AS count ,m.m_name AS name
+			FROM tb_report AS r
+				INNER JOIN tb_sample_plan AS plan
+				INNER JOIN tb_product AS p
+				INNER JOIN tb_manufacturer AS m
+			WHERE r.sa_id = plan.sa_id
+				AND plan.p_id = p.p_id
+				AND p.m_id = m.m_id
+				AND r.r_status = '1'
+				AND r.result = '0'
+				AND YEAR(check_date) = #{year}
+			GROUP BY m.m_name 
+	</select>
+	<select id="countCheckDateYear" resultType="string">
+		SELECT YEAR(check_date)
+			FROM tb_report
+			GROUP BY YEAR(check_date)
+	</select>
+</mapper>

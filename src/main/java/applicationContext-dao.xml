@@ -1,0 +1,40 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+		<!-- 引入连接数据库的四大参数的配置文件 -->
+		<context:property-placeholder location="classpath:dataSource.properties"/>
+		<!-- 配置数据源 -->
+		<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+			<!-- 连接数据库的四大参数 -->
+			<property name="driverClass" value="${jdbc.driver}"/>
+			<property name="jdbcUrl" value="${jdbc.url}"/>
+			<property name="user" value="${jdbc.username}"/>
+			<property name="password" value="${jdbc.password}"/>
+			<!-- 配置池参数 -->
+			<property name="initialPoolSize" value="5"/>
+			<property name="acquireIncrement" value="3"/>
+			<!-- 单位为 s -->
+			<property name="maxIdleTime" value="1800"/>
+			<property name="maxPoolSize" value="20"/>
+		</bean>
+		
+		<!-- 配置SqlSessionFactory -->
+		<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+			<property name="configLocation" value="classpath:MyBatisConfig.xml"/>
+			<property name="dataSource" ref="dataSource"/>
+		</bean>
+		<!-- 以扫描包的方式配置Mapper -->
+		<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+			<property name="basePackage" value="cn.cdtu.mappers"/>
+			<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+		</bean>
+</beans>
